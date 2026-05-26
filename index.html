@@ -579,6 +579,9 @@
       background: #fff7d6; border-color: #e0a500; color: #6b5300;
     }
 
+    /* Honor the [hidden] attribute even when an element has display:flex/grid set */
+    [hidden] { display: none !important; }
+
     /* Compare-mode banner — sits below the tab strip, explains what's happening */
     .cmp-banner {
       display: flex; align-items: center; gap: 10px;
@@ -1158,6 +1161,155 @@
     .usage-quickadjust .csel { font-size: 12px; padding: 3px 6px; border-radius: 3px; }
     .contract-picker .csel { font-size: 13px; padding: 8px 10px; border-color: var(--border-strong); }
     .move-row .csel { font-size: 12px; padding: 4px 6px; }
+
+    /* ── View-mode toggle (Aggregate / Per-Location) ─────────────────────── */
+    .view-toggle {
+      display: inline-flex; gap: 0; margin-right: 8px;
+      background: rgba(255,255,255,.15); border-radius: 6px; padding: 2px;
+    }
+    .view-toggle button {
+      background: transparent; border: 0; color: rgba(255,255,255,.85);
+      padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+      border-radius: 4px; letter-spacing: .2px;
+    }
+    .view-toggle button:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .view-toggle button.active { background: #fff; color: var(--green); }
+
+    /* ── Aggregate view ──────────────────────────────────────────────────── */
+    .agg-wrap {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 0 20px 20px; background: var(--bg);
+      display: flex; flex-direction: column; min-width: 0;
+    }
+    .agg-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0 8px; background: var(--bg);
+      gap: 12px; flex-wrap: wrap;
+    }
+    .agg-table-wrap { overflow-x: auto; width: 100%; }
+    .agg-legend {
+      display: flex; gap: 14px; align-items: center; padding: 8px 2px 0;
+      font-size: 11px; color: var(--text-muted); flex-wrap: wrap;
+    }
+    .agg-legend-title { font-weight: 600; color: var(--text); }
+    .agg-legend-item { display: inline-flex; gap: 5px; align-items: center; }
+    .agg-swatch {
+      width: 10px; height: 10px; border-radius: 2px;
+      border: 1px solid var(--border); display: inline-block;
+    }
+    .agg-swatch.sw-ok   { background: var(--green); border-color: var(--green); }
+    .agg-swatch.sw-low  { background: var(--yellow-bg, #fef9c3); }
+    .agg-swatch.sw-zero { background: var(--red-bg,    #fee2e2); }
+    .agg-swatch.sw-over { background: var(--amber-bg,  #ffedd5); }
+    .agg-title { display: flex; flex-direction: column; gap: 2px; }
+    .agg-title-eyebrow {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--text-muted);
+    }
+    .agg-title-material {
+      font-size: 22px; font-weight: 700; color: var(--green);
+      letter-spacing: -.2px; line-height: 1.15;
+    }
+    .agg-actions { display: flex; gap: 8px; align-items: center; }
+    .agg-clear-btn {
+      padding: 5px 10px; border: 1px solid var(--border); background: var(--white);
+      border-radius: 4px; font-size: 11px; cursor: pointer; color: var(--text-muted);
+    }
+    .agg-clear-btn:hover { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+    .agg-go-btn {
+      padding: 6px 14px; border: 0; background: var(--green); color: #fff;
+      border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;
+    }
+    .agg-go-btn:hover { background: var(--green-mid); }
+
+    .agg-kpis {
+      display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 8px; margin-bottom: 12px;
+    }
+    .agg-kpi {
+      background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .agg-kpi-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--text-muted); margin-bottom: 4px;
+    }
+    .agg-kpi-val { font-size: 18px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+    .agg-kpi-val.iv-neg { color: var(--red-text, #b91c1c); }
+    .agg-kpi-val.iv-pos { color: var(--green); }
+    .agg-kpi-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; }
+
+    table.agg-grid {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      font-size: 12px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+    }
+    .agg-grid th {
+      padding: 7px 10px; text-align: right;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .4px; color: var(--text-muted); background: var(--bg);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+      min-width: 96px;
+    }
+    .agg-grid th:first-child {
+      text-align: left; min-width: 220px; max-width: 260px;
+      background: var(--bg); padding-left: 12px;
+    }
+    .agg-grid th.fc { color: var(--green-mid); }
+    .agg-grid td {
+      padding: 7px 10px; text-align: right;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums; white-space: nowrap;
+      border-right: 1px solid #f3f4f6;
+    }
+    .agg-grid td:first-child {
+      text-align: left; font-weight: 500; padding-left: 12px;
+      border-right: 1px solid var(--border);
+    }
+    .agg-grid td:last-child { border-right: none; }
+
+    .agg-row-instruct td { background: #f3f6fb; color: #1f3a68; }
+    .agg-row-instruct td:first-child { cursor: pointer; user-select: none; }
+    .agg-row-begin    td { background: #fafafa; color: var(--text-muted); }
+    .agg-row-arrive   td { background: #fafafa; }
+    .agg-row-arrive   td:first-child { cursor: pointer; user-select: none; }
+    .agg-caret {
+      display: inline-block; width: 10px; color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .agg-row-contract td {
+      background: #fff; font-size: 11px; color: var(--text-muted);
+      border-top: 1px dashed var(--border);
+    }
+    .agg-row-contract td:first-child { padding-left: 28px; font-weight: 400; }
+    .agg-row-usage    td { background: #fafafa; color: var(--text-muted); }
+    .agg-row-model    td { background: #fffbea; }
+    .agg-row-model    td:first-child { font-weight: 600; color: var(--green); }
+    .agg-row-end      td { background: var(--green); color: #fff; font-weight: 700; }
+    .agg-row-end      td:first-child { background: var(--green); color: #fff; }
+    .agg-row-end td.pv-low   { background: var(--yellow-bg, #fef9c3); color: var(--yellow-text, #854d0e); }
+    .agg-row-end td.pv-zero  { background: var(--red-bg,    #fee2e2); color: var(--red-text,    #b91c1c); font-weight: 700; }
+    .agg-row-end td.pv-over  { background: var(--amber-bg,  #ffedd5); color: var(--amber-text,  #9a3412); }
+
+    .agg-cell-input {
+      width: 100%; min-width: 84px; padding: 3px 6px; font-size: 12px; text-align: right;
+      border: 1px solid var(--border-strong, #d1d5db); border-radius: 3px;
+      font-variant-numeric: tabular-nums; background: #fff;
+    }
+    .agg-cell-input:focus { outline: none; border-color: var(--green-accent); }
+    .agg-cell-readonly { color: var(--text-faint, #9ca3af); }
+
+    .agg-banner {
+      background: #fffbea; border: 1px solid #fbd38d;
+      border-radius: 6px; padding: 8px 14px; margin: 8px 20px 0;
+      font-size: 12px; color: #92400e;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .agg-banner strong { color: var(--green); }
+    .agg-banner-x {
+      background: transparent; border: 0; color: #92400e; cursor: pointer;
+      font-size: 16px; line-height: 1; padding: 0 4px;
+    }
   </style>
 </head>
 <body>
@@ -1190,6 +1342,12 @@
     </span>
   </div>
   <div class="topbar-right">
+    <div class="view-toggle" role="tablist" aria-label="View mode">
+      <button type="button" id="view-toggle-aggregate" class="active" role="tab" aria-selected="true"
+              onclick="setViewMode('aggregate')">Aggregate</button>
+      <button type="button" id="view-toggle-perloc" role="tab" aria-selected="false"
+              onclick="setViewMode('per-location')">Per Location</button>
+    </div>
     <button class="topbar-btn" id="btn-edit-scenario" onclick="openScenarioModal()">⚙ Edit Scenario</button>
     <div class="export-dropdown">
       <button class="topbar-btn" id="btn-export">↓ Export ▾</button>
@@ -1269,6 +1427,40 @@
     </div>
 
     <div class="cmp-banner" id="cmp-banner" hidden></div>
+
+    <!-- Hand-off banner: when planner moves from Aggregate to Per-Location,
+         this reminds them of the modeled-purchase target they just set. -->
+    <div class="agg-banner" id="agg-banner" hidden>
+      <div id="agg-banner-text"></div>
+      <button class="agg-banner-x" onclick="dismissAggBanner()" aria-label="Dismiss">×</button>
+    </div>
+
+    <!-- Aggregate (company-level) planning view ─────────────────────────── -->
+    <div id="aggregate-view" style="display:none;">
+      <div class="agg-kpis" id="agg-kpis"></div>
+      <div class="agg-wrap">
+        <div class="agg-header">
+          <div class="agg-title">
+            <div class="agg-title-eyebrow">Aggregate Plan · Material</div>
+            <div class="agg-title-material" id="agg-material-name">—</div>
+          </div>
+          <div class="agg-actions">
+            <button class="agg-clear-btn" onclick="onClearModeled()">Clear modeled purchases</button>
+            <button class="agg-go-btn" onclick="goToAllocate()">Go to Allocate →</button>
+          </div>
+        </div>
+        <div class="agg-table-wrap">
+          <table class="agg-grid" id="agg-table"></table>
+        </div>
+        <div class="agg-legend" aria-label="Ending Inventory color key">
+          <span class="agg-legend-title">Ending Inventory:</span>
+          <span class="agg-legend-item"><span class="agg-swatch sw-ok"></span>Healthy</span>
+          <span class="agg-legend-item"><span class="agg-swatch sw-low"></span>Below threshold</span>
+          <span class="agg-legend-item"><span class="agg-swatch sw-zero"></span>Out of stock</span>
+          <span class="agg-legend-item"><span class="agg-swatch sw-over"></span>Over capacity</span>
+        </div>
+      </div>
+    </div>
 
     <div class="impact-bar" id="impact-bar">
       <div class="impact-item">
@@ -1754,7 +1946,7 @@ let state = {
   pendingMoves:      [],
 
   // Phase 1 additions for scenario planning ──────────────────────────────────
-  viewMode:          'per-location',                  // 'per-location' | 'aggregate' (wired up in Phase 4)
+  viewMode:          'aggregate',                     // 'per-location' | 'aggregate' — aggregate is the first planning step
   dataAvailability:  {                                // which expected Tableau fields are connected
     material:         true,
     location:         true,
@@ -1775,7 +1967,7 @@ let state = {
     {
       id: 'sc_1',
       name: 'Scenario 1',
-      overlays: { usage: [], rail: [], allocations: [] },
+      overlays: { usage: [], rail: [], allocations: [], modeledPurchases: [] },
       createdAt: Date.now(),
       isChosen: false,
     },
@@ -1796,6 +1988,9 @@ let state = {
   // Phase 5c (placeholder — wired in next phase): controls per-mode expand state
   // for the per-contract child rows under each Inbound row in the grid.
   expandedModes:     { inboundRail: false, inboundTruck: false, inboundBarge: false },
+
+  // Aggregate-view row expansion state (e.g., To-Arrive → per-contract breakdown).
+  aggExpanded:       { toInstruct: false, toArrive: false },
 };
 
 // `state.overlays` proxies to the active scenario's overlays — keeps every existing
@@ -1808,9 +2003,17 @@ Object.defineProperty(state, 'overlays', {
     if (sc) return sc.overlays;
     // Defensive fallback — should never hit, but avoids hard crash if activeScenarioId
     // is somehow stale during a reset transition.
-    return { usage: [], rail: [], allocations: [] };
+    return { usage: [], rail: [], allocations: [], modeledPurchases: [] };
   },
 });
+
+// Defensive migration: older saved scenarios may lack modeledPurchases.
+// Adds the empty array in-place so every overlay reader can rely on it.
+function ensureModeledPurchasesArray() {
+  state.scenarios.forEach(sc => {
+    if (!sc.overlays.modeledPurchases) sc.overlays.modeledPurchases = [];
+  });
+}
 
 function activeScenario() {
   return state.scenarios.find(s => s.id === state.activeScenarioId) || state.scenarios[0];
@@ -2083,6 +2286,207 @@ function computeInventory(loc, useScenario = true) {
     inv.push(cur);
   }
   return inv;
+}
+
+// ── Aggregate (company-level) planning ──────────────────────────────────────
+// New planning step that runs *before* per-location allocation. The planner
+// sees totals summed across every location for the current material and can
+// model purchase tons against a running ending-inventory total. The modeled
+// numbers are scratchpad targets — they do NOT auto-create contracts or
+// allocations. They persist as a normal overlay entry on the active scenario.
+
+function modeledPurchasesArr(material) {
+  const arr = new Array(state.NUM_WEEKS).fill(0);
+  (state.overlays.modeledPurchases || []).forEach(e => {
+    if (e.material !== material) return;
+    if (e.week < 0 || e.week >= state.NUM_WEEKS) return;
+    arr[e.week] = (arr[e.week] || 0) + (e.tons || 0);
+  });
+  return arr;
+}
+
+function getModeledPurchase(material, w) {
+  const e = (state.overlays.modeledPurchases || []).find(x => x.material === material && x.week === w);
+  return e ? e.tons : 0;
+}
+
+function setModeledPurchase(material, w, tons) {
+  if (!state.overlays.modeledPurchases) state.overlays.modeledPurchases = [];
+  const list = state.overlays.modeledPurchases;
+  const idx = list.findIndex(x => x.material === material && x.week === w);
+  const n = tons === '' || tons === null || tons === undefined ? 0 : Math.max(0, Number(tons) || 0);
+  if (n === 0) {
+    if (idx >= 0) list.splice(idx, 1);
+  } else if (idx >= 0) {
+    list[idx].tons = n;
+  } else {
+    list.push({ material, week: w, tons: n });
+  }
+  if (list.length > 0 || state.overlays.usage.length || state.overlays.rail.length || state.overlays.allocations.length
+      || state.editedCells.size || state.pendingMoves.length) {
+    state.hasUserEdits = true;
+  }
+}
+
+function clearModeledPurchases(material) {
+  if (!state.overlays.modeledPurchases) return;
+  state.overlays.modeledPurchases = state.overlays.modeledPurchases.filter(e => e.material !== material);
+}
+
+// Sum length-NUM_WEEKS arrays across all locations for the current material,
+// using a per-location accessor. Generic helper so each aggregate row reuses
+// the existing per-location engine without duplicating its logic.
+function _sumAcrossLocations(material, getPerLoc) {
+  const out = new Array(state.NUM_WEEKS).fill(0);
+  const origMat = state.material;
+  state.material = material; // engine reads state.material; swap then restore.
+  try {
+    state.locations.forEach(loc => {
+      const arr = getPerLoc(loc) || [];
+      for (let w = 0; w < state.NUM_WEEKS; w++) out[w] += (arr[w] || 0);
+    });
+  } finally {
+    state.material = origMat;
+  }
+  return out;
+}
+
+function aggregateToArrive(material, useScenario = true) {
+  return _sumAcrossLocations(material, loc => toArrivePerWeek(loc, useScenario));
+}
+
+// All holding-pen contracts for a material. Holding-pen is the canonical
+// contract pool — contracts only land in state.contracts (per-location grid)
+// once explicitly allocated to a location, so this view should source from
+// the holding pen.
+function contractsForMaterial(material) {
+  return (state.holdingPen || []).filter(c => c.material === material);
+}
+
+// Per-week unallocated ("to-instruct") tons: for each contract, spread its
+// remaining unallocated balance across forecast weeks by weeklyCadence,
+// capped so the cumulative spread never exceeds the contract's remaining.
+function aggregateToInstruct(material) {
+  const out = new Array(state.NUM_WEEKS).fill(0);
+  contractsForMaterial(material).forEach(c => {
+    let remaining = Math.max(0, (c.totalTons || 0) - (c.usedTons || 0) - contractAllocatedTons(c.id));
+    if (remaining <= 0) return;
+    const cadence = Math.max(0, c.weeklyCadence || 0);
+    if (cadence <= 0) return;
+    for (let w = state.ACTUAL_WEEKS; w < state.NUM_WEEKS && remaining > 0; w++) {
+      const take = Math.min(cadence, remaining);
+      out[w] += take;
+      remaining -= take;
+    }
+  });
+  return out;
+}
+
+// Per-week beginning inventory: [0] = aggregate starting inv,
+// [w>0] = ending inventory of week w-1.
+function aggregateBeginningInv(material, modeled) {
+  const inv = aggregateEndingInv(material, modeled); // [start, end_w0, end_w1, ...]
+  return inv.slice(0, state.NUM_WEEKS);
+}
+
+function aggregateUsageStraight(material) {
+  return _sumAcrossLocations(material, loc => applyUsageOverlays(loc, 'straight'));
+}
+
+function aggregateUsageBlend(material) {
+  return _sumAcrossLocations(material, loc => applyUsageOverlays(loc, 'blend'));
+}
+
+function aggregateStartingInv(material) {
+  let sum = 0;
+  state.locations.forEach(loc => {
+    sum += state.startingInv[`${material}|${loc}`] ?? 0;
+  });
+  return sum;
+}
+
+function aggregateCapacity(material) {
+  if (!state.capacityCap) return null;
+  let sum = 0, any = false;
+  state.locations.forEach(loc => {
+    const v = state.capacityCap[`${material}|${loc}`];
+    if (v != null) { sum += v; any = true; }
+  });
+  return any ? sum : null;
+}
+
+// Mirrors computeInventory()'s cascade rules, but on summed inputs and with
+// modeled purchases added to to-arrive. Returns [startTotal, end_w0, ..., end_wN].
+function aggregateEndingInv(material, modeled /* length NUM_WEEKS, optional */) {
+  const ta       = aggregateToArrive(material, true);
+  const sU       = aggregateUsageStraight(material);
+  const bU       = aggregateUsageBlend(material);
+  const start    = aggregateStartingInv(material);
+  const mod      = modeled || modeledPurchasesArr(material);
+
+  // For each location, decide per-week whether the engine would pin to Tableau's
+  // value or cascade from formula. We mirror that decision at the aggregate
+  // level by summing Tableau-pinned values for actual weeks (and untouched
+  // forecast weeks, when there are no user edits), and otherwise cascading.
+  const inv = [start];
+  let cur = start;
+  for (let w = 0; w < state.NUM_WEEKS; w++) {
+    let pinned = null;
+    if (isTableauConnected) {
+      // If every location has a Tableau ending value for this week AND the
+      // engine would use it (actual week, OR forecast with no user edits),
+      // sum those instead of cascading.
+      const wantPinned = !state.hasUserEdits || w < state.ACTUAL_WEEKS;
+      if (wantPinned) {
+        let total = 0, ok = true;
+        for (const loc of state.locations) {
+          const key  = `${material}|${loc}`;
+          const ev   = state.endingInv[key];
+          const ffl  = state.weekIsForecast[key] || [];
+          const isFc = ffl[w] === true;
+          const haveVal = ev && ev[w] != null;
+          // Pin if (actual week with Tableau val) OR (forecast week, no edits, Tableau val).
+          const usesPinned = haveVal && ((!isFc) || (!state.hasUserEdits && isFc));
+          if (!usesPinned) { ok = false; break; }
+          total += ev[w];
+        }
+        if (ok) pinned = total;
+      }
+    }
+    if (pinned != null) {
+      cur = pinned + (mod[w] || 0);
+      // Note: when pinned, modeled purchases add on top so the planner sees
+      // their hypothetical immediately reflected in projected stock.
+    } else {
+      cur = cur + (ta[w] || 0) + (mod[w] || 0) - (sU[w] || 0) - (bU[w] || 0);
+    }
+    inv.push(cur);
+  }
+  return inv;
+}
+
+// Aggregate version of projectionCells — produces per-week cell metadata
+// (value, class, display) for the projected ending inv row.
+function aggregateProjectionCells(material, weekIdxs, modeled) {
+  const inv    = aggregateEndingInv(material, modeled);
+  const cap    = aggregateCapacity(material);
+  const thresh = parseFloat(document.getElementById('thresh-input')?.value) || 0;
+  // Threshold is per-location; for aggregate compare against threshold × #locations.
+  const aggThresh = thresh * state.locations.length;
+
+  return weekIdxs.map(w => {
+    const v = inv[w + 1];
+    let cls = '';
+    if (v == null)                cls = '';
+    else if (v <= 0)              cls = 'pv-zero';
+    else if (v < aggThresh)       cls = 'pv-low';
+    else if (cap && v > cap)      cls = 'pv-over';
+    const display = v == null ? '—' : Math.round(v).toLocaleString();
+    const tooltip = cap
+      ? `Cap: ${cap.toLocaleString()}T · Projected: ${display}T`
+      : `Projected: ${display}T`;
+    return { value: v, cls, display, tooltip };
+  });
 }
 
 // ── Cell editing ──
@@ -2526,8 +2930,18 @@ function setFilter(f, e) {
 }
 
 function onFilterChange() {
+  const prevMaterial = state.material;
   state.material = document.getElementById('sel-material').value;
   state.location = document.getElementById('sel-location').value;
+  // Switching material kicks the planner back to the aggregate step — they
+  // should plan total tonnage for the new material before allocating again.
+  if (state.material !== prevMaterial) state.viewMode = 'aggregate';
+  renderAll();
+}
+
+function setViewMode(mode) {
+  if (mode !== 'aggregate' && mode !== 'per-location') return;
+  state.viewMode = mode;
   renderAll();
 }
 
@@ -2633,14 +3047,294 @@ function renderAll() {
   renderScenarioStrip();
   renderChosenBadge();
   renderCompareUI();
-  renderGrid();
-  renderImpact();
-  renderChart();
+  renderViewMode();      // shows/hides aggregate vs per-location blocks
+  if (state.viewMode === 'aggregate') {
+    renderAggregate();
+  } else {
+    renderGrid();
+    renderImpact();
+    renderChart();
+  }
   renderPending();
   renderOverlays();
   renderHoldingPen();
   document.getElementById('status-right').textContent = `${state.material} · ${state.location}`;
   scheduleSave();
+}
+
+// Toggle visibility of per-location vs aggregate blocks, and the topbar toggle's
+// active button. Keeps DOM in lockstep with state.viewMode.
+function renderViewMode() {
+  const isAgg   = state.viewMode === 'aggregate';
+  const aggEl   = document.getElementById('aggregate-view');
+  const impact  = document.getElementById('impact-bar');
+  const chartA  = document.querySelector('.chart-area');
+  const gridW   = document.querySelector('.main > .grid-wrap');
+  const matrixW = document.getElementById('impact-matrix-wrap');
+  if (aggEl)   aggEl.style.display   = isAgg ? '' : 'none';
+  if (impact)  impact.style.display  = isAgg ? 'none' : '';
+  if (chartA)  chartA.style.display  = isAgg ? 'none' : '';
+  if (gridW)   gridW.style.display   = isAgg ? 'none' : '';
+  if (matrixW) matrixW.style.display = isAgg ? 'none' : matrixW.style.display;
+
+  const aggBtn = document.getElementById('view-toggle-aggregate');
+  const plBtn  = document.getElementById('view-toggle-perloc');
+  if (aggBtn) { aggBtn.classList.toggle('active', isAgg);  aggBtn.setAttribute('aria-selected', isAgg ? 'true' : 'false'); }
+  if (plBtn)  { plBtn .classList.toggle('active', !isAgg); plBtn .setAttribute('aria-selected', !isAgg ? 'true' : 'false'); }
+
+  // Hand-off banner: visible only in per-location mode when modeled tons exist
+  // for the current material — a quiet reminder of the aggregate target.
+  const banner = document.getElementById('agg-banner');
+  if (banner) {
+    if (isAgg || state._aggBannerDismissed) { banner.hidden = true; }
+    else {
+      const total = modeledPurchasesArr(state.material).reduce((a, b) => a + b, 0);
+      if (total > 0) {
+        const allocated = (state.overlays.allocations || [])
+          .filter(a => a.material === state.material).reduce((s, a) => s + (a.tons || 0), 0);
+        const gap = total - allocated;
+        document.getElementById('agg-banner-text').innerHTML =
+          `Aggregate plan for <strong>${state.material}</strong>: ` +
+          `<strong>${Math.round(total).toLocaleString()}T</strong> modeled · ` +
+          `${Math.round(allocated).toLocaleString()}T allocated · ` +
+          `<strong>${Math.round(gap).toLocaleString()}T</strong> remaining to place`;
+        banner.hidden = false;
+      } else {
+        banner.hidden = true;
+      }
+    }
+  }
+}
+
+function dismissAggBanner() {
+  state._aggBannerDismissed = true;
+  const b = document.getElementById('agg-banner');
+  if (b) b.hidden = true;
+}
+
+function goToAllocate() {
+  state._aggBannerDismissed = false;
+  setViewMode('per-location');
+}
+
+function onClearModeled() {
+  const arr = modeledPurchasesArr(state.material);
+  const total = arr.reduce((a, b) => a + b, 0);
+  if (total === 0) return;
+  if (!confirm(`Clear all modeled purchases for ${state.material}? (${Math.round(total).toLocaleString()}T across ${arr.filter(v => v > 0).length} week(s))`)) return;
+  clearModeledPurchases(state.material);
+  if (state.overlays.usage.length === 0
+      && state.overlays.rail.length === 0
+      && state.overlays.allocations.length === 0
+      && (state.overlays.modeledPurchases || []).length === 0
+      && state.editedCells.size === 0
+      && state.pendingMoves.length === 0) {
+    state.hasUserEdits = false;
+  }
+  renderAll();
+  toast(`Cleared modeled purchases for ${state.material}`, 'info');
+}
+
+// ── Aggregate view rendering ────────────────────────────────────────────────
+function renderAggregate() {
+  const material = state.material;
+  document.getElementById('agg-material-name').textContent = material;
+
+  const ta       = aggregateToArrive(material, true);
+  const sU       = aggregateUsageStraight(material);
+  const bU       = aggregateUsageBlend(material);
+  const modeled  = modeledPurchasesArr(material);
+  const instruct = aggregateToInstruct(material);
+  const beginInv = aggregateBeginningInv(material, modeled);
+
+  const weekIdxs = state.WEEKS.map((_, i) => i);
+  const projCells = aggregateProjectionCells(material, weekIdxs, modeled);
+
+  // ── Build the table ────────────────────────────────────────────────────
+  let html = '<thead><tr>';
+  html += `<th>${material.toUpperCase()} · all locations</th>`;
+  state.WEEKS.forEach(w => { html += `<th class="${w.forecast ? 'fc' : ''}">${w.label}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  const cell = v => `<td>${v ? Math.round(v).toLocaleString() : '—'}</td>`;
+  const contracts = contractsForMaterial(material);
+
+  // Row 1 — Total To-Instruct (contracted, not yet allocated; spread by cadence).
+  // Expandable: child rows show each holding-pen contract's per-week cadence
+  // up to its remaining unallocated balance.
+  {
+    const expanded = !!(state.aggExpanded && state.aggExpanded.toInstruct);
+    const caret    = expanded ? '▾' : '▸';
+    html += `<tr class="agg-row-instruct${expanded ? ' expanded' : ''}" data-toggle="toInstruct">`
+         +  `<td><span class="agg-caret">${caret}</span>Total To-Instruct (T)</td>`;
+    for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(instruct[w]);
+    html += '</tr>';
+
+    if (expanded) {
+      if (contracts.length === 0) {
+        html += `<tr class="agg-row-contract"><td>No contracts for ${material}</td>`;
+        for (let w = 0; w < state.NUM_WEEKS; w++) html += '<td>—</td>';
+        html += '</tr>';
+      } else {
+        contracts.forEach(c => {
+          // Per-week unallocated cadence: spread (totalTons - usedTons - allocated)
+          // across forecast weeks at weeklyCadence, capped at remaining.
+          let remaining = Math.max(0, (c.totalTons || 0) - (c.usedTons || 0) - contractAllocatedTons(c.id));
+          const cadence = Math.max(0, c.weeklyCadence || 0);
+          const perWeek = new Array(state.NUM_WEEKS).fill(0);
+          if (cadence > 0) {
+            for (let w = state.ACTUAL_WEEKS; w < state.NUM_WEEKS && remaining > 0; w++) {
+              const take = Math.min(cadence, remaining);
+              perWeek[w] = take;
+              remaining -= take;
+            }
+          }
+          const label = `${c.id} · ${c.supplier} · ${c.mode}`;
+          html += `<tr class="agg-row-contract"><td>${label}</td>`;
+          for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(perWeek[w]);
+          html += '</tr>';
+        });
+      }
+    }
+  }
+
+  // Row 2 — Modeled Purchase (editable, forecast only)
+  html += '<tr class="agg-row-model"><td>Modeled Purchase (T)</td>';
+  for (let w = 0; w < state.NUM_WEEKS; w++) {
+    if (w < state.ACTUAL_WEEKS) {
+      html += '<td class="agg-cell-readonly">—</td>';
+    } else {
+      const v = modeled[w] || 0;
+      html += `<td><input type="number" class="agg-cell-input" min="0" step="100"
+                          value="${v || ''}" data-week="${w}"
+                          placeholder="0" /></td>`;
+    }
+  }
+  html += '</tr>';
+
+  // Row 3 — Total Beginning Inventory
+  html += '<tr class="agg-row-begin"><td>Total Beginning Inventory (T)</td>';
+  for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(beginInv[w]);
+  html += '</tr>';
+
+  // Row 4 — Total To-Arrive (already-allocated inbound); expandable per contract
+  {
+    const expanded = !!(state.aggExpanded && state.aggExpanded.toArrive);
+    const caret    = expanded ? '▾' : '▸';
+    html += `<tr class="agg-row-arrive${expanded ? ' expanded' : ''}" data-toggle="toArrive">`
+         +  `<td><span class="agg-caret">${caret}</span>Total To-Arrive (T)</td>`;
+    for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(ta[w]);
+    html += '</tr>';
+
+    if (expanded) {
+      // Only show contracts that actually have allocations driving the To-Arrive total.
+      const allocs = (state.overlays.allocations || []).filter(a => a.material === material);
+      const byContract = {};
+      allocs.forEach(a => {
+        if (!byContract[a.contractId]) byContract[a.contractId] = new Array(state.NUM_WEEKS).fill(0);
+        byContract[a.contractId][a.week] = (byContract[a.contractId][a.week] || 0) + (a.tons || 0);
+      });
+      const ids = Object.keys(byContract);
+      if (ids.length === 0) {
+        html += `<tr class="agg-row-contract"><td>No allocations yet</td>`;
+        for (let w = 0; w < state.NUM_WEEKS; w++) html += '<td>—</td>';
+        html += '</tr>';
+      } else {
+        ids.forEach(cid => {
+          const c = contracts.find(x => x.id === cid) || { id: cid, supplier: '?', mode: '?' };
+          const label = `${c.id} · ${c.supplier} · ${c.mode}`;
+          html += `<tr class="agg-row-contract"><td>${label}</td>`;
+          for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(byContract[cid][w]);
+          html += '</tr>';
+        });
+      }
+    }
+  }
+
+  // Row 5 — Straight Usage
+  html += '<tr class="agg-row-usage"><td>Straight Usage (T)</td>';
+  for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(sU[w]);
+  html += '</tr>';
+
+  // Row 6 — Blend Usage
+  html += '<tr class="agg-row-usage"><td>Blend Usage (T)</td>';
+  for (let w = 0; w < state.NUM_WEEKS; w++) html += cell(bU[w]);
+  html += '</tr>';
+
+  // Row 7 — Ending Inventory (colored vs threshold/cap)
+  html += '<tr class="agg-row-end"><td>Ending Inventory (T)</td>';
+  for (let w = 0; w < state.NUM_WEEKS; w++) {
+    const c = projCells[w];
+    html += `<td class="${c.cls}" title="${c.tooltip}">${c.display}</td>`;
+  }
+  html += '</tr>';
+
+  html += '</tbody>';
+  document.getElementById('agg-table').innerHTML = html;
+
+  // Wire editable cells.
+  document.querySelectorAll('#agg-table .agg-cell-input').forEach(inp => {
+    inp.addEventListener('change', onModeledCellChange);
+    inp.addEventListener('blur',   onModeledCellChange);
+  });
+
+  // Wire expandable row toggles (label cell only — keep data cells inert).
+  document.querySelectorAll('#agg-table tr[data-toggle]').forEach(tr => {
+    const firstTd = tr.querySelector('td');
+    if (!firstTd) return;
+    firstTd.addEventListener('click', () => {
+      const key = tr.dataset.toggle;
+      state.aggExpanded[key] = !state.aggExpanded[key];
+      renderAggregate();
+    });
+  });
+
+  // ── KPI strip ──────────────────────────────────────────────────────────
+  renderAggregateKPIs(material, modeled, projInv);
+}
+
+function onModeledCellChange(e) {
+  const w   = +e.currentTarget.dataset.week;
+  const raw = e.currentTarget.value;
+  setModeledPurchase(state.material, w, raw);
+  renderAll(); // refreshes the table, KPIs, and overlay sidebar
+}
+
+function renderAggregateKPIs(material, modeled, projInv) {
+  const totalNeeded = modeled.reduce((a, b) => a + b, 0);
+  const allocated = (state.overlays.allocations || [])
+    .filter(a => a.material === material).reduce((s, a) => s + (a.tons || 0), 0);
+  const gap = totalNeeded - allocated;
+  const thresh = parseFloat(document.getElementById('thresh-input')?.value) || 0;
+  const aggThresh = thresh * state.locations.length;
+  const forecastEnds = projInv.slice(1 + state.ACTUAL_WEEKS);
+  const below = forecastEnds.filter(v => v < aggThresh).length;
+  const minProj = forecastEnds.length ? Math.min(...forecastEnds) : 0;
+
+  const fmt = n => Math.round(n).toLocaleString() + 'T';
+  const host = document.getElementById('agg-kpis');
+  host.innerHTML = `
+    <div class="agg-kpi">
+      <div class="agg-kpi-lbl">Total Tons Needed</div>
+      <div class="agg-kpi-val ${totalNeeded > 0 ? 'iv-pos' : ''}">${fmt(totalNeeded)}</div>
+      <div class="agg-kpi-sub">Modeled across ${modeled.filter(v => v > 0).length} week(s)</div>
+    </div>
+    <div class="agg-kpi">
+      <div class="agg-kpi-lbl">Already Allocated</div>
+      <div class="agg-kpi-val">${fmt(allocated)}</div>
+      <div class="agg-kpi-sub">${gap > 0 ? `<span style="color:var(--green-mid)">${fmt(gap)} remaining</span>` : (gap < 0 ? `<span style="color:#b91c1c">${fmt(-gap)} over-allocated</span>` : 'matched')}</div>
+    </div>
+    <div class="agg-kpi">
+      <div class="agg-kpi-lbl">Weeks Below Threshold</div>
+      <div class="agg-kpi-val ${below > 0 ? 'iv-neg' : ''}">${below}</div>
+      <div class="agg-kpi-sub">Forecast weeks below ${Math.round(aggThresh).toLocaleString()}T aggregate</div>
+    </div>
+    <div class="agg-kpi">
+      <div class="agg-kpi-lbl">Min Projected Stock</div>
+      <div class="agg-kpi-val ${minProj < aggThresh ? 'iv-neg' : 'iv-pos'}">${fmt(minProj)}</div>
+      <div class="agg-kpi-sub">Lowest forecast week (all locations)</div>
+    </div>
+  `;
 }
 
 function renderDropdowns() {
@@ -2891,7 +3585,7 @@ function renderImpact() {
   mn.textContent = minV.toLocaleString() + 'T';
   mn.className   = 'impact-val ' + (minV < thresh ? 'iv-neg' : 'iv-pos');
 
-  const ovCount = state.overlays.usage.length + state.overlays.rail.length + state.overlays.allocations.length;
+  const ovCount = state.overlays.usage.length + state.overlays.rail.length + state.overlays.allocations.length + (state.overlays.modeledPurchases?.length || 0);
   document.getElementById('impact-edits').textContent = state.editedCells.size + state.pendingMoves.length + ovCount;
 }
 
@@ -3096,6 +3790,7 @@ function restoreScenariosForCurrentWeek() {
 
   if (entry && Array.isArray(entry.scenarios) && entry.scenarios.length) {
     state.scenarios = JSON.parse(JSON.stringify(entry.scenarios));
+    ensureModeledPurchasesArray();
     if (entry.activeScenarioId && state.scenarios.some(s => s.id === entry.activeScenarioId)) {
       state.activeScenarioId = entry.activeScenarioId;
     } else {
@@ -3113,6 +3808,7 @@ function restoreScenariosForCurrentWeek() {
     const prior = saved.byWeek[priorKey];
     if (prior && Array.isArray(prior.scenarios) && prior.scenarios.length) {
       state.scenarios = JSON.parse(JSON.stringify(prior.scenarios));
+      ensureModeledPurchasesArray();
       state.activeScenarioId = (prior.activeScenarioId && state.scenarios.some(s => s.id === prior.activeScenarioId))
         ? prior.activeScenarioId
         : state.scenarios[0].id;
@@ -3152,9 +3848,10 @@ function createScenario({ duplicate = false } = {}) {
   let overlays;
   if (duplicate) {
     const src = activeScenario();
-    overlays = JSON.parse(JSON.stringify(src ? src.overlays : { usage: [], rail: [], allocations: [] }));
+    overlays = JSON.parse(JSON.stringify(src ? src.overlays : { usage: [], rail: [], allocations: [], modeledPurchases: [] }));
+    if (!overlays.modeledPurchases) overlays.modeledPurchases = [];
   } else {
-    overlays = { usage: [], rail: [], allocations: [] };
+    overlays = { usage: [], rail: [], allocations: [], modeledPurchases: [] };
   }
   const name = duplicate ? `${activeScenario()?.name || 'Scenario'} (copy)` : baseName;
   state.scenarios.push({ id, name, overlays, createdAt: Date.now(), isChosen: false });
@@ -3171,7 +3868,7 @@ function deleteScenario(id) {
   const idx = state.scenarios.findIndex(s => s.id === id);
   if (idx < 0) return;
   const removed = state.scenarios[idx];
-  const overlayCount = removed.overlays.usage.length + removed.overlays.rail.length + removed.overlays.allocations.length;
+  const overlayCount = removed.overlays.usage.length + removed.overlays.rail.length + removed.overlays.allocations.length + (removed.overlays.modeledPurchases?.length || 0);
   if (overlayCount > 0 && !confirm(`Delete "${removed.name}"? It has ${overlayCount} overlay${overlayCount === 1 ? '' : 's'}.`)) return;
   state.scenarios.splice(idx, 1);
   if (state.activeScenarioId === id) {
@@ -3453,7 +4150,7 @@ function renderCompareMatrix() {
     const end   = inv[state.NUM_WEEKS];
     const below = inv.slice(1 + state.ACTUAL_WEEKS).filter(v => v < thresh).length;
     const minV  = Math.min(...inv.slice(1 + state.ACTUAL_WEEKS));
-    const edits = sc.overlays.usage.length + sc.overlays.rail.length + sc.overlays.allocations.length;
+    const edits = sc.overlays.usage.length + sc.overlays.rail.length + sc.overlays.allocations.length + (sc.overlays.modeledPurchases?.length || 0);
     const delta = end - baseEnd;
     const isChosen = !!sc.isChosen;
     const isActive = sc.id === state.activeScenarioId;
@@ -3532,7 +4229,14 @@ function renderOverlays() {
   const usage       = state.overlays.usage || [];
   const rail        = state.overlays.rail || [];
   const allocations = state.overlays.allocations || [];
-  const total = usage.length + rail.length + allocations.length;
+  const modeled     = state.overlays.modeledPurchases || [];
+  // Group modeled entries by material so each material gets a single chip.
+  const modeledByMat = new Map();
+  modeled.forEach(e => {
+    if (!modeledByMat.has(e.material)) modeledByMat.set(e.material, []);
+    modeledByMat.get(e.material).push(e);
+  });
+  const total = usage.length + rail.length + allocations.length + modeledByMat.size;
   if (cnt) cnt.textContent = total ? `(${total})` : '';
 
   if (total === 0) {
@@ -3619,7 +4323,52 @@ function renderOverlays() {
     `;
   }).join('');
 
-  el.innerHTML = usageChips + railChips + allocChips;
+  // Modeled-purchase chips — one per material with a total + week range.
+  const modeledChips = [...modeledByMat.entries()].map(([mat, entries]) => {
+    const totalTons = entries.reduce((s, e) => s + (e.tons || 0), 0);
+    const weeks = entries.map(e => e.week).sort((a, b) => a - b);
+    const minW = weeks[0], maxW = weeks[weeks.length - 1];
+    const wkStart = state.WEEKS[minW] ? state.WEEKS[minW].label : '?';
+    const wkEnd   = state.WEEKS[maxW] ? state.WEEKS[maxW].label : '?';
+    const rangeTxt = minW === maxW ? `Week of ${wkStart}` : `${wkStart} → ${wkEnd}`;
+    const matSafe = mat.replace(/'/g, "\\'");
+    return `
+      <div class="ov-item" onclick="onModeledChipClick('${matSafe}')" style="cursor:pointer">
+        <button class="ov-undo" onclick="event.stopPropagation(); removeModeledForMaterial('${matSafe}')" aria-label="Clear modeled purchases">×</button>
+        <div class="ov-tag">Modeled Purchase</div>
+        <div class="ov-detail"><strong>${Math.round(totalTons).toLocaleString()}T</strong> · ${mat}</div>
+        <div class="ov-sub">${rangeTxt} · ${entries.length} week${entries.length === 1 ? '' : 's'}</div>
+      </div>
+    `;
+  }).join('');
+
+  el.innerHTML = usageChips + railChips + allocChips + modeledChips;
+}
+
+function onModeledChipClick(material) {
+  state.material = material;
+  state.viewMode = 'aggregate';
+  // Sync the sidebar dropdown so the visible selection matches.
+  const sel = document.getElementById('sel-material');
+  if (sel) sel.value = material;
+  renderAll();
+}
+
+function removeModeledForMaterial(material) {
+  const arr = modeledPurchasesArr(material);
+  const total = arr.reduce((a, b) => a + b, 0);
+  if (total === 0) return;
+  clearModeledPurchases(material);
+  if (state.overlays.usage.length === 0
+      && state.overlays.rail.length === 0
+      && state.overlays.allocations.length === 0
+      && (state.overlays.modeledPurchases || []).length === 0
+      && state.editedCells.size === 0
+      && state.pendingMoves.length === 0) {
+    state.hasUserEdits = false;
+  }
+  renderAll();
+  toast(`Cleared modeled purchases for ${material}`, 'info');
 }
 
 // Remove every allocation for a contract across all locations/weeks.
@@ -4885,7 +5634,7 @@ function renderPending() {
 // ── Top bar buttons ──
 document.getElementById('btn-reset').addEventListener('click', () => {
   const totalOverlays = state.scenarios.reduce(
-    (n, s) => n + s.overlays.usage.length + s.overlays.rail.length + s.overlays.allocations.length, 0);
+    (n, s) => n + s.overlays.usage.length + s.overlays.rail.length + s.overlays.allocations.length + (s.overlays.modeledPurchases?.length || 0), 0);
   const multi = state.scenarios.length > 1;
   if ((state.editedCells.size || state.pendingMoves.length || totalOverlays || multi)
       && !confirm('Reset all scenario changes? This removes every named scenario and returns to baseline.')) return;
@@ -4895,7 +5644,7 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   state.scenarios = [{
     id: 'sc_1',
     name: 'Scenario 1',
-    overlays: { usage: [], rail: [], allocations: [] },
+    overlays: { usage: [], rail: [], allocations: [], modeledPurchases: [] },
     createdAt: Date.now(),
     isChosen: false,
   }];
@@ -4986,7 +5735,14 @@ function buildExportTables() {
     delta_tons:  r.deltaTons,
   }));
 
-  return { summary, allocations, usageOverlays, railOverlays };
+  // Modeled aggregate purchases (planning targets — not actual allocations).
+  const modeledPurchases = (state.overlays.modeledPurchases || []).map(e => ({
+    material:   e.material,
+    week_label: weeks[e.week] ? weeks[e.week].label : e.week,
+    tons:       e.tons,
+  }));
+
+  return { summary, allocations, usageOverlays, railOverlays, modeledPurchases };
 }
 
 function fmtCsvCell(v) {
@@ -5027,10 +5783,11 @@ function safeName(s) { return String(s).replace(/[^A-Za-z0-9_-]+/g, '_'); }
       '',
     ].join('\n');
     const csv = preamble +
-      sectionToCsv('Summary',        t.summary) + '\n' +
-      sectionToCsv('Allocations',    t.allocations) + '\n' +
-      sectionToCsv('Usage Overlays', t.usageOverlays) + '\n' +
-      sectionToCsv('Rail Overlays',  t.railOverlays);
+      sectionToCsv('Summary',            t.summary) + '\n' +
+      sectionToCsv('Allocations',        t.allocations) + '\n' +
+      sectionToCsv('Usage Overlays',     t.usageOverlays) + '\n' +
+      sectionToCsv('Rail Overlays',      t.railOverlays) + '\n' +
+      sectionToCsv('Modeled Purchases',  t.modeledPurchases);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = `scenario_${safeName(state.material)}_${safeName(state.location)}_${nowStamp()}.csv`;
@@ -5096,10 +5853,11 @@ function loadXLSX() {
     }
     const t  = buildExportTables();
     const wb = XLSX.utils.book_new();
-    appendSheet(wb, 'Summary',        t.summary);
-    appendSheet(wb, 'Allocations',    t.allocations);
-    appendSheet(wb, 'Usage Overlays', t.usageOverlays);
-    appendSheet(wb, 'Rail Overlays',  t.railOverlays);
+    appendSheet(wb, 'Summary',            t.summary);
+    appendSheet(wb, 'Allocations',        t.allocations);
+    appendSheet(wb, 'Usage Overlays',     t.usageOverlays);
+    appendSheet(wb, 'Rail Overlays',      t.railOverlays);
+    appendSheet(wb, 'Modeled Purchases',  t.modeledPurchases);
     XLSX.writeFile(wb, `scenario_${safeName(state.material)}_${safeName(state.location)}_${nowStamp()}.xlsx`);
     toast('Excel exported', 'success');
   });
