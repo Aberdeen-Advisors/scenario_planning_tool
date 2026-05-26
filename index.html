@@ -3290,6 +3290,7 @@ function renderAggregate() {
   });
 
   // ── KPI strip ──────────────────────────────────────────────────────────
+  const projInv = aggregateEndingInv(material, modeled);
   renderAggregateKPIs(material, modeled, projInv);
 }
 
