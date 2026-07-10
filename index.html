@@ -1356,7 +1356,6 @@
         <button id="export-xlsx" type="button">Export Excel</button>
       </div>
     </div>
-    <button class="topbar-btn" id="btn-reset">Exit Scenario Mode ✕</button>
   </div>
 </header>
 
@@ -5631,31 +5630,6 @@ function renderPending() {
     </div>
   `).join('');
 }
-
-// ── Top bar buttons ──
-document.getElementById('btn-reset').addEventListener('click', () => {
-  const totalOverlays = state.scenarios.reduce(
-    (n, s) => n + s.overlays.usage.length + s.overlays.rail.length + s.overlays.allocations.length + (s.overlays.modeledPurchases?.length || 0), 0);
-  const multi = state.scenarios.length > 1;
-  if ((state.editedCells.size || state.pendingMoves.length || totalOverlays || multi)
-      && !confirm('Reset all scenario changes? This removes every named scenario and returns to baseline.')) return;
-  state.contracts    = JSON.parse(JSON.stringify(state.baselineContracts));
-  state.editedCells.clear();
-  state.pendingMoves = [];
-  state.scenarios = [{
-    id: 'sc_1',
-    name: 'Scenario 1',
-    overlays: { usage: [], rail: [], allocations: [], modeledPurchases: [] },
-    createdAt: Date.now(),
-    isChosen: false,
-  }];
-  state.activeScenarioId    = 'sc_1';
-  state.compareMode         = false;
-  state.comparedScenarioIds = [];
-  state.hasUserEdits = false;
-  renderAll();
-  toast('Reset to baseline', 'info');
-});
 
 // ══════════════════════════════════════════════════════════
 // Phase 7 — Session-only export (CSV / XLSX / Print to PDF)
