@@ -609,6 +609,10 @@
     .cmp-banner-text { flex: 1 1 auto; line-height: 1.45; }
     .cmp-banner-text strong { color: var(--green); }
 
+    /* Compare-mode matrix wrapper is a fixed-height block above the
+       still-scrollable aggregate table / contract grid below it. */
+    #impact-matrix-wrap { flex-shrink: 0; }
+
     /* Compare-mode card layout — baseline + up to MAX_SCENARIOS in one row */
     .cmp-cards {
       display: grid;
@@ -1187,6 +1191,9 @@
     .view-toggle button.active { background: #fff; color: var(--green); }
 
     /* ── Aggregate view ──────────────────────────────────────────────────── */
+    #aggregate-view {
+      flex: 1; display: flex; flex-direction: column; min-height: 0;
+    }
     .agg-wrap {
       flex: 1; overflow-y: auto; overflow-x: hidden;
       padding: 0 20px 20px; background: var(--bg);
@@ -1447,6 +1454,10 @@
       <button class="agg-banner-x" onclick="dismissAggBanner()" aria-label="Dismiss">×</button>
     </div>
 
+    <div id="impact-matrix-wrap" style="display:none;">
+      <div id="impact-matrix"></div>
+    </div>
+
     <!-- Aggregate (company-level) planning view ─────────────────────────── -->
     <div id="aggregate-view" style="display:none;">
       <div class="agg-kpis" id="agg-kpis"></div>
@@ -1496,10 +1507,6 @@
         <div class="impact-lbl">&nbsp;</div>
         <button type="button" class="choose-btn" id="btn-choose" onclick="toggleChooseActive()">★ Choose</button>
       </div>
-    </div>
-
-    <div id="impact-matrix-wrap" style="display:none;">
-      <div id="impact-matrix"></div>
     </div>
 
     <div class="chart-area">
@@ -4094,10 +4101,12 @@ function renderCompareUI() {
   const ibar   = document.getElementById('impact-bar');
   if (!banner || !mwrap || !ibar) return;
 
+  const isAgg = state.viewMode === 'aggregate';
+
   if (!state.compareMode) {
     banner.hidden = true;
     mwrap.style.display = 'none';
-    ibar.style.display = '';
+    ibar.style.display = isAgg ? 'none' : '';
     return;
   }
 
