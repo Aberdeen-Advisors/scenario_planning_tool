@@ -27,12 +27,12 @@
       --blue-light:   #eff6ff;
 
       /* Spacing scale */
-      --space-1: 4px;
-      --space-2: 8px;
-      --space-3: 12px;
-      --space-4: 16px;
-      --space-5: 20px;
-      --space-6: 24px;
+      --space-1: 3px;
+      --space-2: 7px;
+      --space-3: 10px;
+      --space-4: 14px;
+      --space-5: 17px;
+      --space-6: 20px;
 
       /* Semantic state colors (background + text + border triplets) */
       --red-bg:            #fee2e2;
@@ -52,7 +52,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 13px;
+      font-size: 11px;
       background: var(--bg);
       color: var(--text);
       display: flex;
@@ -94,7 +94,7 @@
     .topbar {
       background: var(--green); color: #fff;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px; height: 40px; flex-shrink: 0;
+      padding: 0 14px; height: 34px; flex-shrink: 0;
     }
     .topbar-left { display: flex; align-items: center; gap: 10px; }
     .topbar-title { font-size: 13px; font-weight: 600; letter-spacing: .3px; }
@@ -132,7 +132,7 @@
 
     /* Sidebar */
     .sidebar {
-      width: 240px; background: var(--white); border-right: 1px solid var(--border);
+      width: 210px; background: var(--white); border-right: 1px solid var(--border);
       display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
     }
     .sb-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
@@ -6128,6 +6128,7 @@ function applyMockFallbacks() {
 }
 
 function renderDataBanner() {
+  return; // demo: banner disabled until data sources are wired up
   const missingFields = [];
   const d = state.dataAvailability;
   if (!d.contractedCars) missingFields.push('Contracted cars');
