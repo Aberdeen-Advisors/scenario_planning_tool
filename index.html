@@ -1458,6 +1458,7 @@
           </div>
           <div class="agg-actions">
             <button class="agg-clear-btn" onclick="onClearModeled()">Clear modeled purchases</button>
+            <button type="button" class="choose-btn" id="btn-choose-agg" onclick="toggleChooseActive()">★ Choose</button>
             <button class="agg-go-btn" onclick="goToAllocate()">Go to Allocate →</button>
           </div>
         </div>
@@ -3061,8 +3062,8 @@ function renderAll() {
   renderFilterCounts();
   renderScenarioStrip();
   renderChosenBadge();
-  renderCompareUI();
   renderViewMode();      // shows/hides aggregate vs per-location blocks
+  renderCompareUI();     // owns impact-matrix-wrap visibility, runs after so it isn't clobbered
   if (state.viewMode === 'aggregate') {
     renderAggregate();
   } else {
@@ -3085,12 +3086,12 @@ function renderViewMode() {
   const impact  = document.getElementById('impact-bar');
   const chartA  = document.querySelector('.chart-area');
   const gridW   = document.querySelector('.main > .grid-wrap');
-  const matrixW = document.getElementById('impact-matrix-wrap');
   if (aggEl)   aggEl.style.display   = isAgg ? '' : 'none';
   if (impact)  impact.style.display  = isAgg ? 'none' : '';
   if (chartA)  chartA.style.display  = isAgg ? 'none' : '';
   if (gridW)   gridW.style.display   = isAgg ? 'none' : '';
-  if (matrixW) matrixW.style.display = isAgg ? 'none' : matrixW.style.display;
+  // impact-matrix-wrap (Compare mode cards) visibility is owned by renderCompareUI(),
+  // driven by state.compareMode — not by aggregate vs. per-location view mode.
 
   const aggBtn = document.getElementById('view-toggle-aggregate');
   const plBtn  = document.getElementById('view-toggle-perloc');
@@ -3128,8 +3129,7 @@ function dismissAggBanner() {
 }
 
 function goToAllocate() {
-  state._aggBannerDismissed = false;
-  setViewMode('per-location');
+  openScenarioModal({ tab: 'contracts' });
 }
 
 function onClearModeled() {
@@ -3980,15 +3980,14 @@ function renderChosenBadge() {
   } else {
     badge.hidden = true;
   }
-  // Choose button state on the active scenario
-  const btn = document.getElementById('btn-choose');
-  if (btn) {
-    const active = activeScenario();
-    const isChosen = !!(active && active.isChosen);
+  // Choose button state on the active scenario (mirrored across per-location and aggregate views)
+  const active = activeScenario();
+  const isChosen = !!(active && active.isChosen);
+  document.querySelectorAll('.choose-btn').forEach(btn => {
     btn.classList.toggle('is-chosen', isChosen);
     btn.textContent = isChosen ? '★ Chosen' : '★ Choose';
     btn.title = isChosen ? 'Clear chosen scenario' : 'Mark this scenario as the chosen plan for this session';
-  }
+  });
 }
 
 function renderScenarioStrip() {
