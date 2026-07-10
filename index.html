@@ -56,7 +56,18 @@
       background: var(--bg);
       color: var(--text);
       display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    /* Scales the whole app to fit whatever container it's embedded in
+       (e.g. a fixed-size Tableau dashboard zone) — see fitToContainer(). */
+    #app-scale {
+      display: flex;
       flex-direction: column;
+      flex-shrink: 0;
+      transform-origin: top left;
+      overflow: hidden;
     }
 
     /* Loading */
@@ -1314,6 +1325,8 @@
 </head>
 <body>
 
+<div id="app-scale">
+
 <div id="loading">
   <div class="spinner"></div>
   <div class="loading-text">Connecting to Tableau…</div>
@@ -1672,6 +1685,8 @@
   </div>
 </div>
 
+</div><!-- /#app-scale -->
+
 <script>
 /* ══════════════════════════════════════════════════════════
    CSEL — Custom dropdown for Tableau Extension webview
@@ -1749,17 +1764,18 @@
       });
       menu.appendChild(row);
     });
-    document.body.appendChild(menu);
+    document.getElementById('app-scale').appendChild(menu);
     // Position. Default below; flip above if it overflows.
+    const vbox = getViewportBox();
     const mh = menu.offsetHeight;
     const mw = menu.offsetWidth;
     let top = rect.bottom + 2;
-    if (top + mh > window.innerHeight - 8) {
+    if (top + mh > vbox.bottom - 8) {
       top = Math.max(8, rect.top - 2 - mh);
     }
     let left = rect.left;
-    if (left + mw > window.innerWidth - 8) {
-      left = Math.max(8, window.innerWidth - 8 - mw);
+    if (left + mw > vbox.right - 8) {
+      left = Math.max(8, vbox.right - 8 - mw);
     }
     menu.style.top = top + 'px';
     menu.style.left = left + 'px';
@@ -2785,7 +2801,7 @@ function showRailMovePopover(anchor, fromWeek, loc, maxAmount) {
     const snapped = Math.round(amt / 100) * 100;
     const snapNote = amt !== snapped ? ` <span style="color:var(--amber)">(will snap to ${snapped}T)</span>` : '';
     host.innerHTML = `
-      <div class="popover" style="top:${rect.bottom + 6}px; left:${Math.min(rect.left, window.innerWidth - 320)}px">
+      <div class="popover" style="top:${rect.bottom + 6}px; left:${Math.min(rect.left, getViewportBox().right - 320)}px">
         <div class="popover-title">Move rail tonnage between weeks</div>
         <div class="popover-sub">${loc} · Week of ${state.WEEKS[fromWeek].label} · ${maxAmount}T scheduled</div>
         <div class="move-row">
@@ -2860,7 +2876,7 @@ function showTransferPopover(anchor, cid, w, maxAmount, isAuto) {
     const used      = moves.reduce((s, m) => s + (parseFloat(m.amount) || 0), 0);
     const remaining = maxAmount - used;
     host.innerHTML = `
-      <div class="popover" style="top:${rect.bottom + 6}px; left:${Math.min(rect.left, window.innerWidth - 320)}px">
+      <div class="popover" style="top:${rect.bottom + 6}px; left:${Math.min(rect.left, getViewportBox().right - 320)}px">
         <div class="popover-title">${isAuto ? 'Reallocate freed inventory?' : 'Move inventory'}</div>
         <div class="popover-sub">${c.supplier} ${c.contract} · ${state.WEEKS[w].label} · ${maxAmount}T available</div>
         ${moves.map((m, i) => `
@@ -4058,7 +4074,7 @@ function openScenarioNewMenu(e) {
     <button type="button" data-act="blank">Start blank scenario</button>
     <button type="button" data-act="dup">Duplicate active scenario</button>
   `;
-  document.body.appendChild(menu);
+  document.getElementById('app-scale').appendChild(menu);
   menu.addEventListener('click', (ev) => {
     const act = ev.target?.dataset?.act;
     if (act === 'blank') createScenario({ duplicate: false });
@@ -6168,6 +6184,30 @@ function toast(msg, type = 'info') {
   document.getElementById('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
+
+// ── Fit-to-container scaling ──
+// Scales the whole app to fit whatever fixed-size container it's embedded in
+// (e.g. a Tableau dashboard "Web Page" zone), so users never need to zoom out.
+const DESIGN_WIDTH  = 1280;
+const DESIGN_HEIGHT = 800;
+
+function getViewportBox() {
+  return document.getElementById('app-scale').getBoundingClientRect();
+}
+
+function fitToContainer() {
+  const wrapper = document.getElementById('app-scale');
+  const scale = Math.min(
+    window.innerWidth  / DESIGN_WIDTH,
+    window.innerHeight / DESIGN_HEIGHT,
+    1 // never scale up beyond 100%
+  );
+  wrapper.style.width  = DESIGN_WIDTH + 'px';
+  wrapper.style.height = DESIGN_HEIGHT + 'px';
+  wrapper.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitToContainer);
+fitToContainer();
 
 // ── Boot ──
 initExtension();
