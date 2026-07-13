@@ -6092,9 +6092,19 @@ function weekISOToLabel(iso) {
 
 function initExtension() {
   if (typeof tableau !== 'undefined' && tableau.extensions) {
-    tableau.extensions.initializeAsync()
-      .then(() => { isTableauConnected = true; loadTableauData(); })
+    // initializeAsync() hangs (never resolves or rejects) when this page is
+    // loaded as a plain Web Page object instead of a real Extension zone —
+    // there's no postMessage handshake partner to respond. Race it against a
+    // timeout so we still fall back instead of hanging on Tableau's own
+    // "Tableau is connecting..." loading state.
+    let settled = false;
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('initializeAsync timed out')), 2000)
+    );
+    Promise.race([tableau.extensions.initializeAsync(), timeout])
+      .then(() => { settled = true; isTableauConnected = true; loadTableauData(); })
       .catch(err => {
+        if (settled) return;
         console.error('[ext] initializeAsync failed:', err);
         toast(`Tableau init failed: ${err && err.message ? err.message : err}`, 'info');
         bootFallback();
